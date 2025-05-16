@@ -340,12 +340,13 @@
             max-height: 90%;
             object-fit: contain;
         }
+    
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <img src="data/icon.png" alt="MIHANI Logo" class="logo">
+            <img src="logo.png" alt="MIHANI Logo" class="logo">
             <h1>منصة مهني - MIHANI</h1>
         </div>
 
@@ -430,6 +431,29 @@
         let professionals = [];
         let currentUser = null;
 
+        // دوال حفظ واسترجاع البيانات
+        function saveProfessionals() {
+            try {
+                localStorage.setItem('mihani_professionals', JSON.stringify(professionals));
+            } catch (error) {
+                console.error('خطأ في حفظ البيانات:', error);
+                showToast('حدث خطأ في حفظ البيانات', 'error');
+            }
+        }
+
+        function loadProfessionals() {
+            try {
+                const saved = localStorage.getItem('mihani_professionals');
+                if (saved) {
+                    professionals = JSON.parse(saved);
+                    updateProfessionalsList();
+                }
+            } catch (error) {
+                console.error('خطأ في تحميل البيانات:', error);
+                showToast('حدث خطأ في تحميل البيانات', 'error');
+            }
+        }
+
         function showSearchForm() {
             document.getElementById('searchForm').style.display = 'block';
             document.getElementById('loginForm').style.display = 'none';
@@ -488,6 +512,7 @@
 
         function previewWorkImages(event) {
             const container = document.getElementById('workImagesPreview');
+            container.innerHTML = ''; // مسح الصور السابقة
             const files = event.target.files;
             
             if (files) {
@@ -552,6 +577,7 @@
 
                     professionals.push(professional);
                     currentUser = professional;
+                    saveProfessionals();
                     showToast('تم التسجيل بنجاح');
                     showSearchForm();
                 } else {
@@ -573,6 +599,7 @@
                         profileImage: document.getElementById('profilePreview').src,
                         workImages: workImages
                     };
+                    saveProfessionals();
                     showToast('تم تحديث البيانات بنجاح');
                     showSearchForm();
                 }
@@ -682,6 +709,7 @@
         function deleteProfessional(id) {
             if (!isAdmin) return;
             professionals = professionals.filter(p => p.id !== id);
+            saveProfessionals();
             updateProfessionalsList();
             showToast('تم حذف الحساب بنجاح');
         }
@@ -747,7 +775,11 @@
             }, 3000);
         }
 
-        window.onload = showSearchForm;
+        // تحميل البيانات عند بدء التطبيق
+        window.onload = function() {
+            loadProfessionals();
+            showSearchForm();
+        };
     </script>
 </body>
 </html>
